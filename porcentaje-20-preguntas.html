@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Porcentaje</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:wght@400;700&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+  /* Concepto: hoja de cuaderno cuadriculado, tinta azul y resaltador amarillo para marcar lo importante. */
+  :root {
+    --paper: #f6f8fc;
+    --card: #ffffff;
+    --ink: #14213d;
+    --ink-soft: #4a5a78;
+    --line: #d5dcec;
+    --grid: #e4e9f4;
+    --accent: #2147c9;
+    --accent-ink: #ffffff;
+    --mark: #ffe96b;
+    --ok: #17703a;
+    --ok-bg: #e0f4e8;
+    --bad: #a3261f;
+    --bad-bg: #fbe3e1;
+    --warn-bg: #fff4cc;
+    --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+    --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #0f1626;
+      --card: #172036;
+      --ink: #e8edf8;
+      --ink-soft: #a3b0cb;
+      --line: #2c3856;
+      --grid: #18213a;
+      --accent: #8ea8ff;
+      --accent-ink: #0f1626;
+      --mark: #6b5d00;
+      --ok: #6fe0a0;
+      --ok-bg: #12301f;
+      --bad: #ff9b93;
+      --bad-bg: #3a1815;
+      --warn-bg: #3a3210;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --paper: #0f1626;
+    --card: #172036;
+    --ink: #e8edf8;
+    --ink-soft: #a3b0cb;
+    --line: #2c3856;
+    --grid: #18213a;
+    --accent: #8ea8ff;
+    --accent-ink: #0f1626;
+    --mark: #6b5d00;
+    --ok: #6fe0a0;
+    --ok-bg: #12301f;
+    --bad: #ff9b93;
+    --bad-bg: #3a1815;
+    --warn-bg: #3a3210;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background-color: var(--paper);
+    background-image:
+      linear-gradient(var(--grid) 1px, transparent 1px),
+      linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size: 28px 28px;
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 17px;
+    line-height: 1.55;
+    padding-block: 28px 64px;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+  }
+  .wrap { max-width: 760px; margin: 0 auto; display: grid; gap: 20px; }
+
+  header { display: grid; gap: 14px; padding-bottom: 6px; }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2rem, 6vw, 3rem);
+    line-height: 1.05;
+    margin: 0;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  h1 span { background: linear-gradient(transparent 58%, var(--mark) 58%); padding: 0 .15em; }
+  .note {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 4px solid var(--accent);
+    border-radius: 6px;
+    padding: 14px 16px;
+    display: grid;
+    gap: 8px;
+    max-width: 68ch;
+  }
+  .note p { margin: 0; }
+
+  textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 9px 11px;
+    width: 100%;
+    min-width: 0;
+  }
+  textarea { resize: vertical; min-height: 76px; }
+  textarea:focus-visible, button:focus-visible, .opt:has(input:focus-visible) {
+    outline: 3px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .progress {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: var(--paper);
+    border-bottom: 1px solid var(--line);
+    margin-inline: calc(-1 * max(16px, env(safe-area-inset-left, 0px)));
+    padding: 8px max(16px, env(safe-area-inset-right, 0px)) 8px max(16px, env(safe-area-inset-left, 0px));
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: .9rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+  .bar { flex: 1; height: 8px; background: var(--line); border-radius: 99px; overflow: hidden; }
+  .bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .25s; }
+
+  .q {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 18px 18px 16px;
+    display: grid;
+    gap: 14px;
+    scroll-margin-top: 64px;
+  }
+  .q-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .q-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1.05rem;
+    background: var(--mark);
+    color: var(--ink);
+    padding: 1px 10px;
+    border-radius: 4px;
+    font-variant-numeric: tabular-nums;
+  }
+  :root[data-theme="dark"] .q-num { color: #fff; }
+  @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .q-num { color: #fff; } }
+  .q-text { margin: 0; flex: 1 1 100%; text-wrap: pretty; }
+  .status { margin-left: auto; font-size: .8rem; font-weight: 700; padding: 2px 10px; border-radius: 99px; }
+  .status.ok { background: var(--ok-bg); color: var(--ok); }
+  .status.bad { background: var(--bad-bg); color: var(--bad); }
+  .status.none { background: var(--warn-bg); color: var(--ink); }
+
+  .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .opt {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 10px 12px;
+    cursor: pointer;
+    background: var(--paper);
+    min-width: 0;
+  }
+  .opt:hover { border-color: var(--accent); }
+  .opt input { accent-color: var(--accent); width: 18px; height: 18px; flex: none; margin: 0; }
+  .opt b { font-family: var(--font-display); }
+  .opt:has(input:checked) { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+  .opt.right { border-color: var(--ok); background: var(--ok-bg); box-shadow: inset 0 0 0 1px var(--ok); }
+  .opt.wrong { border-color: var(--bad); background: var(--bad-bg); box-shadow: inset 0 0 0 1px var(--bad); }
+  .done .opt { cursor: default; }
+
+  .why { display: grid; gap: 4px; font-size: .88rem; color: var(--ink-soft); }
+  .sol {
+    border-top: 1px dashed var(--line);
+    padding-top: 12px;
+    display: grid;
+    gap: 4px;
+    font-size: .95rem;
+  }
+  .sol strong { color: var(--ok); }
+  .sol .steps { white-space: pre-line; font-variant-numeric: tabular-nums; line-height: 1.7; }
+
+  .actions { display: grid; gap: 10px; justify-items: start; }
+  button {
+    font: inherit;
+    font-family: var(--font-display);
+    font-weight: 600;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: 0;
+    border-radius: 6px;
+    padding: 12px 22px;
+    cursor: pointer;
+  }
+  button.ghost { background: transparent; color: var(--accent); border: 1px solid var(--accent); }
+  .warn { background: var(--warn-bg); border-radius: 6px; padding: 8px 12px; margin: 0; font-size: .95rem; }
+
+  .result {
+    background: var(--card);
+    border: 2px solid var(--accent);
+    border-radius: 8px;
+    padding: 20px;
+    display: grid;
+    gap: 6px;
+    scroll-margin-top: 16px;
+  }
+  .result .big { font-family: var(--font-display); font-weight: 800; font-size: 2.4rem; line-height: 1; font-variant-numeric: tabular-nums; }
+  .result p { margin: 0; }
+
+  @media (max-width: 540px) {
+    body { font-size: 16px; }
+    .opts { grid-template-columns: minmax(0, 1fr); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    .bar i { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1><span>Porcentaje</span></h1>
+    <div class="note">
+      <p>En las actividades muchas veces solo se solicita elegir una respuesta entre varias, pero también es importante presentar una breve explicación del razonamiento utilizado para llegar a ella.</p>
+      <p>Expresar el procedimiento con palabras propias o registrar los pasos principales ayuda a organizar el pensamiento y permite identificar posibles errores.</p>
+    </div>
+  </header>
+
+  <div class="progress" aria-live="polite">
+    <span id="count">0 de 20 respondidas</span>
+    <div class="bar"><i id="fill"></i></div>
+  </div>
+
+  <main id="quiz" class="wrap" style="padding:0"></main>
+
+  <div class="actions" id="actions">
+    <p class="warn" id="warn" hidden></p>
+    <button type="button" id="finish">Finalizar y ver resultados</button>
+  </div>
+
+  <section class="result" id="result" hidden aria-live="polite"></section>
+</div>
+
+<script>
+(function () {
+  var NB = " ";
+  var P = function (s) { return s.replace(/ %/g, NB + "%").replace(/(\d) (\d{3})(?!\d)/g, "$1" + NB + "$2"); };
+
+  // a: índice de la opción correcta (0 = A, 1 = B, 2 = C, 3 = D)
+  var Q = [
+    { q: "¿Cuánto es el 20 % de 148?", o: ["2,96", "29,6", "296", "7,4"], a: 1,
+      s: "148 – 100 %\nx – 20 %\nx = 148 · 20 ÷ 100 = 148 · 0,20 = 29,6" },
+    { q: "El 20 % de un número es 45. ¿Cuál es el número?", o: ["9", "90", "225", "900"], a: 2,
+      s: "45 – 20 %\nx – 100 %\nx = 45 · 100 ÷ 20 = 45 ÷ 0,20 = 225" },
+    { q: "¿Cuánto es el 35 % de 80?", o: ["28", "2,8", "280", "35"], a: 0,
+      s: "80 – 100 %\nx – 35 %\nx = 80 · 35 ÷ 100 = 80 · 0,35 = 28" },
+    { q: "El 15 % de un número es 36. ¿Cuál es el número?", o: ["5,4", "54", "2400", "240"], a: 3,
+      s: "36 – 15 %\nx – 100 %\nx = 36 · 100 ÷ 15 = 36 ÷ 0,15 = 240" },
+    { q: "Un celular cuesta $12 000 y tiene un descuento del 25 %. ¿Cuánto se paga por él?", o: ["$3 000", "$9 000", "$11 975", "$15 000"], a: 1,
+      s: "Con el 25 % de descuento se paga el 75 %.\n12 000 – 100 %\nx – 75 %\nx = 12 000 · 75 ÷ 100 = 12 000 · 0,75 = 9 000" },
+    { q: "Un libro costaba $800 y ahora cuesta $920. ¿Qué porcentaje aumentó su precio?", o: ["12 %", "13,04 %", "15 %", "120 %"], a: 2,
+      s: "Aumento: 920 − 800 = 120\n800 – 100 %\n120 – x\nx = 120 · 100 ÷ 800 = 15 %" },
+    { q: "En un curso de 40 estudiantes, 14 obtuvieron nota alta. ¿Qué porcentaje del curso representan?", o: ["35 %", "28 %", "14 %", "40 %"], a: 0,
+      s: "40 – 100 %\n14 – x\nx = 14 · 100 ÷ 40 = 35 %" },
+    { q: "Después de un aumento del 20 %, un artículo cuesta $3 600. ¿Cuál era su precio original?", o: ["$2 880", "$3 580", "$4 320", "$3 000"], a: 3,
+      s: "Con el 20 % de aumento, $3 600 es el 120 % del precio original.\nx – 100 %\n3 600 – 120 %\nx = 3 600 · 100 ÷ 120 = 3 600 ÷ 1,20 = 3 000" },
+    { q: "Una campera con 25 % de descuento cuesta $1 800. ¿Cuál era su precio antes del descuento?", o: ["$1 350", "$2 250", "$2 400", "$2 700"], a: 2,
+      s: "Con el 25 % de descuento, $1 800 es el 75 % del precio original.\nx – 100 %\n1 800 – 75 %\nx = 1 800 · 100 ÷ 75 = 1 800 ÷ 0,75 = 2 400" },
+    { q: "Una receta necesita 300 g de papa cocida. Al pelarla, la papa cruda pierde el 20 % de su masa y, ya pelada, pierde otro 25 % al cocinarse. ¿Cuántos gramos de papa cruda hay que cortar al inicio?", o: ["375 g", "500 g", "545 g", "450 g"], a: 1,
+      s: "La papa cocida es el 75 % de la pelada.\nx – 100 %\n300 – 75 %\nx = 300 · 100 ÷ 75 = 300 ÷ 0,75 = 400 g (pelada)\n\nLa papa pelada es el 80 % de la cruda.\ny – 100 %\n400 – 80 %\ny = 400 · 100 ÷ 80 = 400 ÷ 0,80 = 500 g (cruda)\n\nLos porcentajes no se suman: 20 % + 25 % = 45 % daría 545 g." },
+    { q: "Un producto de $1 800 tiene un descuento del 20 % y después otro del 10 % sobre el precio ya rebajado. ¿Cuál es el precio final?", o: ["$1 296", "$1 260", "$1 350", "$1 440"], a: 0,
+      s: "Primer descuento (queda el 80 %):\n1 800 – 100 %\nx – 80 %\nx = 1 800 · 80 ÷ 100 = 1 800 · 0,80 = 1 440\n\nSegundo descuento (queda el 90 %):\n1 440 – 100 %\ny – 90 %\ny = 1 440 · 90 ÷ 100 = 1 440 · 0,90 = 1 296\n\nNo equivale a un 30 % de descuento (daría $1 260)." },
+    { q: "Un precio aumenta un 10 % y luego el nuevo precio aumenta un 20 %. ¿A qué aumento único equivale?", o: ["30 %", "31 %", "35 %", "32 %"], a: 3,
+      s: "Se toma un precio inicial de 100.\n\nPrimer aumento (110 %):\n100 – 100 %\nx – 110 %\nx = 100 · 110 ÷ 100 = 100 · 1,10 = 110\n\nSegundo aumento (120 %):\n110 – 100 %\ny – 120 %\ny = 110 · 120 ÷ 100 = 110 · 1,20 = 132\n\nAumento total: 132 − 100 = 32, es decir, 32 %." },
+    { q: "Un artículo tiene un descuento del 20 % y luego otro del 25 % sobre el precio rebajado. ¿A qué descuento único equivale?", o: ["45 %", "35 %", "40 %", "50 %"], a: 2,
+      s: "Se toma un precio inicial de 100.\n\nPrimer descuento (queda el 80 %):\n100 – 100 %\nx – 80 %\nx = 100 · 80 ÷ 100 = 100 · 0,80 = 80\n\nSegundo descuento (queda el 75 %):\n80 – 100 %\ny – 75 %\ny = 80 · 75 ÷ 100 = 80 · 0,75 = 60\n\nQueda 60, entonces el descuento total es 100 − 60 = 40 %." },
+    { q: "Un electrodoméstico cuesta $1 830 con IVA incluido (22 %). ¿Cuál es su precio sin IVA?", o: ["$1 427,40", "$1 500", "$1 808", "$2 232,60"], a: 1,
+      s: "El precio con IVA es el 122 % del precio sin IVA.\nx – 100 %\n1 830 – 122 %\nx = 1 830 · 100 ÷ 122 = 1 830 ÷ 1,22 = 1 500" },
+    { q: "Una solución de 250 mL contiene 12 % de alcohol. ¿Cuántos mL de alcohol hay?", o: ["30 mL", "3 mL", "220 mL", "300 mL"], a: 0,
+      s: "250 – 100 %\nx – 12 %\nx = 250 · 12 ÷ 100 = 250 · 0,12 = 30 mL" },
+    { q: "Un jugador de básquetbol acertó 18 de 24 lanzamientos. ¿Qué porcentaje de aciertos tuvo?", o: ["18 %", "66,6 %", "133,3 %", "75 %"], a: 3,
+      s: "24 – 100 %\n18 – x\nx = 18 · 100 ÷ 24 = 75 %" },
+    { q: "El 30 % de los 500 estudiantes de un liceo va en bicicleta, y el 40 % de esos ciclistas son mujeres. ¿Cuántas mujeres van en bicicleta?", o: ["70", "200", "60", "150"], a: 2,
+      s: "Ciclistas:\n500 – 100 %\nx – 30 %\nx = 500 · 30 ÷ 100 = 500 · 0,30 = 150\n\nMujeres ciclistas:\n150 – 100 %\ny – 40 %\ny = 150 · 40 ÷ 100 = 150 · 0,40 = 60" },
+    { q: "¿Qué porcentaje de 80 es 20?", o: ["4 %", "25 %", "20 %", "400 %"], a: 1,
+      s: "80 – 100 %\n20 – x\nx = 20 · 100 ÷ 80 = 25 %" },
+    { q: "El precio de un artículo baja de $500 a $400. ¿Qué porcentaje disminuyó?", o: ["20 %", "25 %", "80 %", "100 %"], a: 0,
+      s: "Disminución: 500 − 400 = 100\n500 – 100 %\n100 – x\nx = 100 · 100 ÷ 500 = 20 %" },
+    { q: "Un sueldo de $20 000 aumenta un 10 % y después se le descuenta un 10 % del nuevo valor. ¿Cuál es el sueldo final?", o: ["$20 000", "$19 000", "$18 000", "$19 800"], a: 3,
+      s: "Aumento (110 %):\n20 000 – 100 %\nx – 110 %\nx = 20 000 · 110 ÷ 100 = 20 000 · 1,10 = 22 000\n\nDescuento (queda el 90 %):\n22 000 – 100 %\ny – 90 %\ny = 22 000 · 90 ÷ 100 = 22 000 · 0,90 = 19 800\n\nEl 10 % de descuento se aplica sobre una cantidad mayor, por eso no se vuelve al valor inicial." }
+  ];
+  var L = ["A", "B", "C", "D"];
+
+  var quiz = document.getElementById("quiz");
+  var html = Q.map(function (it, i) {
+    var opts = it.o.map(function (t, k) {
+      return '<label class="opt" id="o' + i + '_' + k + '"><input type="radio" name="q' + i + '" value="' + k + '"><span><b>' + L[k] + ')</b> ' + P(t) + '</span></label>';
+    }).join("");
+    return '<article class="q" id="q' + i + '">' +
+      '<div class="q-head"><span class="q-num">' + (i + 1) + '</span><span class="status" id="st' + i + '" hidden></span>' +
+      '<p class="q-text">' + P(it.q) + '</p></div>' +
+      '<div class="opts" role="radiogroup" aria-label="Pregunta ' + (i + 1) + '">' + opts + '</div>' +
+      '<label class="why" for="e' + i + '">Explicación breve de tu razonamiento' +
+      '<textarea id="e' + i + '" placeholder="Escribe aquí los pasos o la idea que usaste"></textarea></label>' +
+      '<div class="sol" id="sol' + i + '" hidden></div>' +
+      '</article>';
+  }).join("");
+  quiz.innerHTML = html;
+
+  var finished = false, warned = false;
+  var count = document.getElementById("count");
+  var fill = document.getElementById("fill");
+  var warn = document.getElementById("warn");
+  var finish = document.getElementById("finish");
+
+  function answered() {
+    var n = 0;
+    for (var i = 0; i < Q.length; i++) {
+      if (document.querySelector('input[name="q' + i + '"]:checked')) n++;
+    }
+    return n;
+  }
+  function update() {
+    var n = answered();
+    count.textContent = n + " de " + Q.length + " respondidas";
+    fill.style.width = (n / Q.length * 100) + "%";
+    if (n === Q.length) { warn.hidden = true; warned = false; finish.textContent = "Finalizar y ver resultados"; }
+  }
+  quiz.addEventListener("change", function () { if (!finished) update(); });
+
+  function showResults() {
+    finished = true;
+    var ok = 0, blank = 0;
+    Q.forEach(function (it, i) {
+      var sel = document.querySelector('input[name="q' + i + '"]:checked');
+      var st = document.getElementById("st" + i);
+      var sol = document.getElementById("sol" + i);
+      document.getElementById("q" + i).classList.add("done");
+      document.querySelectorAll('input[name="q' + i + '"]').forEach(function (r) { r.disabled = true; });
+      document.getElementById("e" + i).readOnly = true;
+      document.getElementById("o" + i + "_" + it.a).classList.add("right");
+      st.hidden = false;
+      if (!sel) { blank++; st.className = "status none"; st.textContent = "Sin responder"; }
+      else if (+sel.value === it.a) { ok++; st.className = "status ok"; st.textContent = "Correcta"; }
+      else {
+        st.className = "status bad"; st.textContent = "Incorrecta";
+        document.getElementById("o" + i + "_" + sel.value).classList.add("wrong");
+      }
+      sol.hidden = false;
+      sol.innerHTML = '<span><strong>Respuesta correcta: ' + L[it.a] + ')</strong> ' + P(it.o[it.a]) + '</span><span class="steps">' + P(it.s) + '</span>';
+    });
+    var pct = Math.round(ok / Q.length * 100);
+    var res = document.getElementById("result");
+    res.hidden = false;
+    res.innerHTML = '<span>Resultado</span>' +
+      '<span class="big">' + ok + ' / ' + Q.length + '</span>' +
+      '<p>' + pct + NB + '% de respuestas correctas' + (blank ? ' · ' + blank + ' sin responder' : '') + '.</p>' +
+      '<p>Compara tu explicación de cada pregunta con la resolución y revisa los pasos donde aparezcan diferencias.</p>';
+    document.getElementById("actions").innerHTML = '<button type="button" class="ghost" id="again">Volver a empezar</button>';
+    document.getElementById("again").addEventListener("click", function () { location.reload(); });
+    res.scrollIntoView();
+  }
+
+  finish.addEventListener("click", function () {
+    var missing = Q.length - answered();
+    if (missing > 0 && !warned) {
+      warned = true;
+      warn.hidden = false;
+      warn.textContent = missing === 1 ? "Falta 1 pregunta por responder." : "Faltan " + missing + " preguntas por responder.";
+      finish.textContent = "Finalizar de todos modos";
+      return;
+    }
+    showResults();
+  });
+
+  update();
+})();
+</script>
+</body>
+</html>
